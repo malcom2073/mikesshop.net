@@ -16,7 +16,6 @@ import { Layout, Menu, Breadcrumb } from 'antd';
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 import pageLayout from '../components/pagelayout'
 import Router from 'next/router'
-
 class IndexPage extends React.Component {
     constructor(props)
     {
@@ -27,8 +26,11 @@ class IndexPage extends React.Component {
     }
     
     render() {
+
+                
         return (
             <>
+
                 This is some content
             </>
         )

@@ -7,24 +7,28 @@ import nextCookie from 'next-cookies'
 import privateRoute from "../components/privateroute";
 import { render } from 'react-dom';
 import pageLayout from '../components/pagelayout'
+import dynamic from 'next/dynamic'
+import myDataProvider from '../components/dataprovider'
+import jsonServerProvider from 'ra-data-json-server';
+const Resource = dynamic(() => import("react-admin").then((mod)=>mod.Resource), { ssr: false });
+const ListGuesser = dynamic(() => import("react-admin").then((mod)=>mod.ListGuesser), { ssr: false });
+const EditGuesser = dynamic(() => import("react-admin").then((mod)=>mod.EditGuesser), { ssr: false });
+const Admin = dynamic(() => import("react-admin").then((mod)=>mod.Admin), { ssr: false });
 
 
 class Private extends React.Component {
-  //constructor(props) {
-    //super(props)
-  //}
+  constructor(props) {
+    super(props);
+//    this.dataProvider = jsonServerProvider('https://jsonplaceholder.typicode.com');
+      this.dataProvider = myDataProvider;
+  }
   render() {
   return (
   <>
-  <Container fluid>
-    <Row>
-    Private stuff here!
-    {this.props.auth && this.props.auth.isValid() ?  'This is valid!' : 'Invalid'}
-    More text
-    {this.props.auth && this.props.auth.token}
-    Last Text
-    </Row>
-  </Container>
+          <Admin dataProvider={this.dataProvider}>
+                <Resource name="posts" list={ListGuesser} edit={EditGuesser} />
+                <Resource name="users" list={ListGuesser} edit={EditGuesser} />
+                </Admin>
   </>
   )
   }
