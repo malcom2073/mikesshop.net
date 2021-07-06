@@ -1,0 +1,92 @@
+version: '3.5'
+
+services:
+  backend:
+    image: 10.0.0.252:5000/docker_backend
+    restart: always
+    build:
+      context: ../
+      dockerfile: docker/backend/Dockerfile
+    volumes:
+#      - '../:/usr/src/app'
+      - ./upload:/upload
+    networks:
+#      - backend
+      - frontend
+#      - db
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_CONFIG=development
+      - FLASK_ENV=development
+      - APP_SETTINGS=project.config.DevelopmentConfig
+      - DATABASE_URL="postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:5432/${DB_DATABASE}""
+      - SECRET_KEY="${BACKEND_SECRET_KEY}"
+      - NEXT_PUBLIC_MSAPI_ENDPOINT=http://mikesshop.net 
+    depends_on:
+      - db
+
+  db:
+    restart: always
+    image: 10.0.0.252:5000/docker_db
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    networks:
+      - frontend
+#      - db
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER="${DB_USER}"
+      - POSTGRES_PASSWORD="${DB_PASS}"
+
+  nginx:
+    image: 10.0.0.252:5000/docker_nginx
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+#      - backend
+      - frontend
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+      - frontend
+
+  frontend:
+    image: 10.0.0.252:5000/docker_frontend
+    restart: always
+    build:
+      context: ../
+      dockerfile: docker/frontend/Dockerfile
+#    volumes:
+#      - './frontend:/usr/src/app'
+#      - '/usr/src/app/node_modules'
+#    volumes:
+#      - '../:/usr/src/app'
+    networks:
+      - frontend
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_SERVICE_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - backend
+
+
+networks:
+  frontend:
+    driver: bridge
+#    name: custom-driver-1
+#  backend:
+#    name: custom-driver-2
+#  db:
+#    name: custom-driver-3
